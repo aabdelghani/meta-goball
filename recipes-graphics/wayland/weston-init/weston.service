@@ -1,0 +1,31 @@
+[Unit]
+Description=Weston Wayland Compositor (Kiosk Mode)
+After=systemd-user-sessions.service dbus.socket
+Wants=dbus.socket
+Requires=weston.socket
+Before=graphical.target
+ConditionPathExists=/dev/tty0
+
+[Service]
+Type=notify
+ExecStartPre=/bin/sh -c 'mkdir -p /run/weston && chmod 0700 /run/weston'
+Environment="XDG_RUNTIME_DIR=/run/weston"
+ExecStart=/usr/bin/weston --modules=systemd-notify.so
+User=root
+Group=root
+WorkingDirectory=/root
+
+TTYPath=/dev/tty1
+TTYReset=yes
+TTYVHangup=yes
+TTYVTDisallocate=yes
+
+StandardInput=tty-fail
+StandardOutput=journal
+StandardError=journal
+
+UtmpIdentifier=tty1
+UtmpMode=user
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,26 @@
+# Generated docs (rebuild from .md source)
+*.pdf
+*.docx
+
+# Bundled third-party source (BitBake fetches from upstream)
+recipes-multimedia/sdl2-mixer/files/SDL2_mixer-2.8.1/
+
+# Sensitive files (use .sample versions and rename)
+recipes-config/goball-config/files/Banhof.nmconnection
+recipes-config/goball-config/files/authorized_keys
+
+# Build artifacts
+build*/
+*.pyc
+*.pyo
+
+# Editor / IDE
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,2 @@
+# Allow root logins for GoBall kiosk
+DROPBEAR_EXTRA_ARGS=""

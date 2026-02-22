@@ -1,0 +1,12 @@
+[connection]
+id=Ethernet
+type=ethernet
+autoconnect=true
+autoconnect-priority=200
+
+[ipv4]
+method=manual
+addresses=10.0.0.2/24
+
+[ipv6]
+method=disabled

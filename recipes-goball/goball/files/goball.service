@@ -1,0 +1,23 @@
+[Unit]
+Description=GoBall Mini Golf Scoring System
+After=weston.service sound.target pulseaudio-system.service
+Wants=pulseaudio-system.service
+Requires=weston.service
+
+[Service]
+Type=simple
+Environment="SDL_VIDEODRIVER=wayland"
+Environment="SDL_VIDEO_GL_DRIVER=libGLESv2.so.2"
+Environment="SDL_AUDIODRIVER=pulseaudio"
+Environment="WAYLAND_DISPLAY=wayland-1"
+Environment="XDG_RUNTIME_DIR=/run/weston"
+Environment="PULSE_SERVER=unix:/run/pulse/native"
+ExecStartPre=/bin/sleep 2
+ExecStart=/usr/bin/goball
+Restart=on-failure
+RestartSec=5
+User=root
+SupplementaryGroups=pulse-access
+
+[Install]
+WantedBy=multi-user.target
