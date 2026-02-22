@@ -1,0 +1,43 @@
+# GoBall Yocto Build Configuration
+# Copy this to your build/conf/local.conf
+
+MACHINE = "raspberrypi5"
+DISTRO = "goball-distro"
+INIT_MANAGER = "systemd"
+
+# GPU / display
+ENABLE_DWC2_PERIPHERAL = "0"
+DISABLE_VC4GRAPHICS = "0"
+VC4DTBO = "vc4-kms-v3d"
+
+# HDMI configuration
+HDMI_FORCE_HOTPLUG = "1"
+RPI_EXTRA_CONFIG = " \nkernel=Image \nhdmi_group=2 \nhdmi_mode=87 \nhdmi_cvt=2560 720 60 3 0 0 0 \ndisable_splash=1 \n"
+
+# Clean boot: no logos, no boot messages, no cursor, no splash
+DISABLE_SPLASH = "1"
+DISABLE_RPI_BOOT_LOGO = "1"
+BOOT_DELAY = "0"
+BOOT_DELAY_MS = "0"
+CMDLINE:append = " console=tty3 quiet loglevel=0 vt.global_cursor_default=0 video=HDMI-A-2:2560x720@60D"
+
+# Disable U-Boot (causes black screen on RPi5)
+RPI_USE_U_BOOT = "0"
+
+# PIO kernel module for WS2812 LEDs
+MACHINE_EXTRA_RRECOMMENDS += "kernel-module-rp1-pio"
+
+# Build optimizations (auto-detected, override if needed)
+# BB_NUMBER_THREADS = "8"
+# PARALLEL_MAKE = "-j 8"
+
+# Extra disk space (1GB)
+IMAGE_ROOTFS_EXTRA_SPACE = "1048576"
+
+# Accept all licenses
+LICENSE_FLAGS_ACCEPTED = "commercial synaptics-killswitch"
+
+PACKAGE_CLASSES = "package_rpm"
+
+# Development: allow root login with password
+EXTRA_IMAGE_FEATURES += "debug-tweaks"

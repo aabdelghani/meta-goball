@@ -1,0 +1,20 @@
+# GoBall Yocto Layer Configuration
+# Copy this to your build/conf/bblayers.conf
+# The setup script replaces ##POKYDIR## with the actual path automatically.
+
+POKY_BBLAYERS_CONF_VERSION = "2"
+
+BBPATH = "${TOPDIR}"
+BBFILES ?= ""
+
+BBLAYERS ?= " \
+  ##POKYDIR##/meta \
+  ##POKYDIR##/meta-poky \
+  ##POKYDIR##/meta-yocto-bsp \
+  ##POKYDIR##/meta-raspberrypi \
+  ##POKYDIR##/meta-openembedded/meta-oe \
+  ##POKYDIR##/meta-openembedded/meta-python \
+  ##POKYDIR##/meta-openembedded/meta-multimedia \
+  ##POKYDIR##/meta-openembedded/meta-networking \
+  ##POKYDIR##/meta-goball \
+  "

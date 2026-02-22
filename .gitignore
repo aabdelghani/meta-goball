@@ -9,8 +9,8 @@ recipes-multimedia/sdl2-mixer/files/SDL2_mixer-2.8.1/
 recipes-config/goball-config/files/Banhof.nmconnection
 recipes-config/goball-config/files/authorized_keys
 
-# Build artifacts
-build*/
+# Build artifacts (but not build-templates/)
+build/
 *.pyc
 *.pyo
 
