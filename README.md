@@ -38,6 +38,7 @@ These files are gitignored. The repo ships `.sample` versions as templates.
 - **Machine:** raspberrypi5
 - **Distro:** goball-distro (GoBall OS 1.0)
 - **Display:** 2560x720 ultrawide via HDMI-A-2 (KMS/DRM, custom CVT mode)
+- **Boot Splash:** Custom psplash with GoBall branding (5s visible before compositor)
 - **Compositor:** Weston (kiosk-shell)
 - **Renderer:** SDL2 Wayland backend + OpenGL ES 2.0 (Mesa)
 - **Audio:** PulseAudio (system mode) -> ALSA -> HDMI audio
@@ -60,6 +61,7 @@ meta-goball/
 │   └── bblayers.conf.sample
 ├── recipes-core/
 │   ├── images/goball-image.bb
+│   ├── psplash/                     # Custom boot splash (GoBall branding)
 │   └── dropbear/                    # Dropbear SSH overrides
 ├── recipes-goball/goball/
 │   ├── goball_1.0.bb                # Main app recipe (fetches from GitHub)
@@ -102,13 +104,27 @@ bitbake goball-config -c cleansstate && bitbake goball-image
 
 # Rebuild after weston.ini changes
 bitbake weston-init -c cleansstate && bitbake goball-image
+
+# Rebuild after splash image changes
+bitbake psplash -c cleansstate && bitbake goball-image
 ```
+
+## Boot Splash
+
+The image includes a custom psplash boot splash (`psplash-goball.png`, 2560x720) that displays during early boot. Weston startup is delayed 5 seconds to keep the splash visible.
+
+To replace the splash image, put your PNG in `recipes-core/psplash/files/psplash-goball.png` and rebuild:
+```bash
+bitbake psplash -c cleansstate && bitbake goball-image
+```
+
+**RPi5 psplash fix:** The meta-raspberrypi layer's `framebuf.conf` references a framebuffer device path that udev doesn't activate on RPi5. This layer overrides it to remove the broken dependency.
 
 ## First Boot
 
 1. Insert SD card into RPi5
 2. Connect HDMI to ultrawide display (**use HDMI port 1** on the board = HDMI-A-2 in DRM)
-3. Power on — Weston starts and GoBall launches automatically
+3. Power on — GoBall splash appears, then Weston starts and the app launches automatically
 
 ### SSH Access
 

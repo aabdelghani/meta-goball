@@ -336,7 +336,7 @@ The `%` is a wildcard — our append applies to ANY version of the dropbear reci
 | `libsdl2-mixer_2.8.1.bb` | Multimedia | SDL2 audio mixer | Sound effects (WAV playback only) |
 | `dropbear_%.bbappend` | SSH override | Modifies Dropbear SSH config | Allows root login for development |
 | `weston-init.bbappend` | Display override | Modifies Weston compositor config | Kiosk mode, custom resolution |
-| `psplash_%.bbappend` | Boot splash override | Custom boot splash image | Shows "GoBall Loading..." during boot |
+| `psplash_%.bbappend` | Boot splash override | Custom 2560x720 GoBall splash image | Branded splash during early boot (before Weston) |
 
 ### Package Dependencies Explained
 
@@ -457,7 +457,7 @@ PID 1: systemd
   │     └── GoBall (Wayland client — renders the UI)
   ├── pulseaudio (audio server)
   ├── NetworkManager (network management)
-  ├── dropbear (SSH server)
+  ├── sshd (OpenSSH server)
   └── journald (logging)
 ```
 
@@ -490,14 +490,15 @@ Linux Kernel
   │ - Starts systemd (PID 1)
   ▼
 psplash (early userspace)
-  │ - Shows "GoBall Loading..." on framebuffer
-  │ - Runs until Weston takes over the display
+  │ - Shows custom GoBall splash image (2560x720) on framebuffer
+  │ - Uses overridden framebuf.conf (RPi5 fb0 device path fix)
+  │ - Stays visible for ~5 seconds (Weston startup delay)
   ▼
 systemd
   │ - Starts services in dependency order:
   │   1. NetworkManager (network)
   │   2. PulseAudio (audio)
-  │   3. Weston (display compositor)
+  │   3. Weston (5s ExecStartPre sleep keeps splash visible)
   │   4. GoBall (after weston.service is ready)
   ▼
 Weston (kiosk-shell)
@@ -771,7 +772,13 @@ SDL_VIDEODRIVER=wayland SDL_VIDEO_GL_DRIVER=libGLESv2.so.2 \
 | 7 | Boot console text visible | Console output on tty1 | `console=tty3 quiet loglevel=0` | 2026-02-22 |
 | 8 | Custom resolution ignored | KMS ignores firmware hdmi_cvt | `video=HDMI-A-2:2560x720@60D` kernel param | 2026-02-22 |
 | 9 | Wrong HDMI port | Monitor on HDMI-A-2 | Updated weston.ini and kernel cmdline | 2026-02-22 |
-| 10 | PulseAudio not connecting | System mode timing | Non-fatal (app continues) | OPEN |
+| 10 | SSH "Permission denied" | Dropbear PAM blocks native password auth on RPi5 | Switched to OpenSSH + `extrausers` with pre-hashed root password | 2026-02-22 |
+| 11 | Host ethernet IP keeps dropping | NetworkManager DHCP on direct PC-Pi link (no DHCP server) | `nmcli connection modify` to static IP 10.0.0.1/24 | 2026-02-22 |
+| 12 | psplash not installed | `splash` never added to IMAGE_FEATURES | Added `splash` to IMAGE_FEATURES in goball-image.bb | 2026-02-22 |
+| 13 | psplash service never starts | meta-raspberrypi `framebuf.conf` requires device unit udev never activates on RPi5 | Override with empty `[Unit]` to remove broken dependency | 2026-02-22 |
+| 14 | RPi default splash overrides custom | meta-raspberrypi `:rpi` override has higher priority | Use `:raspberrypi5` machine override (more specific) | 2026-02-22 |
+| 15 | psplash visible too briefly | Weston starts immediately, taking over display | Added `ExecStartPre=/bin/sleep 5` to weston.service | 2026-02-22 |
+| 16 | PulseAudio not connecting | System mode timing | Non-fatal (app continues) | OPEN |
 
 ---
 

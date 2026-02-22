@@ -8,6 +8,7 @@ ConditionPathExists=/dev/tty0
 
 [Service]
 Type=notify
+ExecStartPre=/bin/sleep 5
 ExecStartPre=/bin/sh -c 'mkdir -p /run/weston && chmod 0700 /run/weston'
 Environment="XDG_RUNTIME_DIR=/run/weston"
 ExecStart=/usr/bin/weston --modules=systemd-notify.so
