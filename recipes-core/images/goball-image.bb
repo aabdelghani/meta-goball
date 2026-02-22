@@ -33,6 +33,7 @@ IMAGE_INSTALL += " \
     alsa-utils \
     alsa-plugins \
     kernel-modules \
+    rpi-eeprom \
     rpi-gpio \
     i2c-tools \
     devmem2 \
