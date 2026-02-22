@@ -1,6 +1,6 @@
 SUMMARY = "GoBall Kiosk Image for Raspberry Pi 5"
 
-IMAGE_FEATURES += "ssh-server-openssh"
+IMAGE_FEATURES += "ssh-server-openssh splash"
 
 inherit core-image extrausers
 
