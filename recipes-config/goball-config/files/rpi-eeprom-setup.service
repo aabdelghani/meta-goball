@@ -1,0 +1,12 @@
+[Unit]
+Description=Configure RPi5 EEPROM (first boot)
+After=local-fs.target
+ConditionPathExists=!/var/lib/goball/eeprom-configured
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/rpi-eeprom-setup.sh
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
