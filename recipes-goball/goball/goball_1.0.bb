@@ -5,14 +5,13 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda
 
 DEPENDS = "libsdl2 libsdl2-mixer libgpiod"
 
-SRC_URI = "git://github.com/aabdelghani/GoBall.git;protocol=https;branch=ui-redesign \
-           file://goball.service \
+SRC_URI = "file://goball.service \
            file://pulseaudio-system.service"
-SRCREV = "${AUTOREV}"
 
-S = "${WORKDIR}/git"
+inherit externalsrc cmake systemd pkgconfig
 
-inherit cmake systemd pkgconfig
+EXTERNALSRC = "/home/q/1Projects/GoBall/SquareLine_Project"
+EXTERNALSRC_BUILD = "${WORKDIR}/build"
 
 EXTRA_OECMAKE = "-DCMAKE_BUILD_TYPE=Debug -DYOCTO_BUILD=ON -DSOUND_DIR_PATH=/opt/goball/sounds/"
 
