@@ -1,0 +1,15 @@
+#!/bin/sh
+# GoBall test scenario: navigate to Tips and play first video
+SCRIPT_DIR=$(dirname "$0")
+tap() { "$SCRIPT_DIR/tap" "$@"; }
+echo "=== Tips Scenario ==="
+
+echo "1. Tap TIPS button"
+tap 2366 187
+sleep 1
+
+echo "2. Tap first video (first quarter)"
+tap 320 360
+sleep 1
+
+echo "=== Tips scenario complete ==="

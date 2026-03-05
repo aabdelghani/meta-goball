@@ -6,7 +6,10 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda
 DEPENDS = "libsdl2 libsdl2-mixer libgpiod"
 
 SRC_URI = "file://goball.service \
-           file://pulseaudio-system.service"
+           file://pulseaudio-system.service \
+           file://tap \
+           file://tips_scenario \
+           file://quotapoints_scenario"
 
 inherit externalsrc cmake systemd pkgconfig
 
@@ -35,8 +38,13 @@ do_install() {
     install -d ${D}${systemd_system_unitdir}
     install -m 0644 ${WORKDIR}/goball.service ${D}${systemd_system_unitdir}/goball.service
     install -m 0644 ${WORKDIR}/pulseaudio-system.service ${D}${systemd_system_unitdir}/pulseaudio-system.service
+
+    install -d ${D}/opt/tests
+    install -m 0755 ${WORKDIR}/tap ${D}/opt/tests/tap
+    install -m 0755 ${WORKDIR}/tips_scenario ${D}/opt/tests/tips_scenario
+    install -m 0755 ${WORKDIR}/quotapoints_scenario ${D}/opt/tests/quotapoints_scenario
 }
 
-RDEPENDS:${PN} += "rpidistro-ffmpeg"
+RDEPENDS:${PN} += "rpidistro-ffmpeg python3-core"
 
-FILES:${PN} += "/opt/goball /opt/goball/sounds /opt/goball/videos"
+FILES:${PN} += "/opt/goball /opt/goball/sounds /opt/goball/videos /opt/tests"

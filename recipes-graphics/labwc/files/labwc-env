@@ -1,0 +1,4 @@
+# labwc environment defaults
+WLR_LIBINPUT_NO_DEVICES=1
+XDG_RUNTIME_DIR=/run/labwc
+LIBSEAT_BACKEND=builtin

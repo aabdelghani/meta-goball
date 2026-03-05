@@ -1,0 +1,36 @@
+[Unit]
+Description=labwc Wayland compositor
+Documentation=https://labwc.github.io/
+Requires=systemd-user-sessions.service
+After=systemd-user-sessions.service
+After=plymouth-quit-wait.service
+Wants=dbus.socket
+After=dbus.socket
+Before=graphical.target
+ConditionPathExists=/dev/tty0
+
+[Service]
+Type=simple
+EnvironmentFile=/etc/default/labwc
+ExecStartPre=/bin/mkdir -p /run/labwc
+ExecStartPre=/bin/sleep 5
+ExecStart=/usr/bin/labwc -s "wlr-randr --output HDMI-A-2 --mode 2560x720"
+Restart=on-failure
+RestartSec=5
+User=root
+Group=root
+
+TTYPath=/dev/tty1
+TTYReset=yes
+TTYVHangup=yes
+TTYVTDisallocate=yes
+
+StandardInput=tty-fail
+StandardOutput=journal
+StandardError=journal
+
+UtmpIdentifier=tty1
+UtmpMode=user
+
+[Install]
+WantedBy=graphical.target

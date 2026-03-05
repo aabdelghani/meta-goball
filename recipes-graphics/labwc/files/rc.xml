@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<labwc_config>
+  <core>
+    <gap>0</gap>
+    <decoration>none</decoration>
+  </core>
+  <theme>
+    <name></name>
+    <titlebar>
+      <height>0</height>
+    </titlebar>
+  </theme>
+  <focus>
+    <followMouse>no</followMouse>
+    <raiseOnFocus>no</raiseOnFocus>
+  </focus>
+  <windowRules>
+    <!-- ffplay: positioned by goball, must NOT be maximized -->
+    <windowRule identifier="ffplay" title="*">
+      <skipTaskbar>yes</skipTaskbar>
+      <properties>
+        <decorate>no</decorate>
+      </properties>
+    </windowRule>
+    <!-- goball/LVGL: maximize, no decorations -->
+    <windowRule identifier="goball" title="*">
+      <action name="Maximize"/>
+      <skipTaskbar>yes</skipTaskbar>
+      <properties>
+        <decorate>no</decorate>
+      </properties>
+    </windowRule>
+  </windowRules>
+  <!-- Hide cursor immediately (kiosk/touchscreen mode) -->
+  <cursor>
+    <hide>0</hide>
+  </cursor>
+  <!-- Kiosk mode: no keyboard shortcuts for window management -->
+  <keyboard>
+  </keyboard>
+  <!-- Kiosk mode: no mouse actions for window close/move/resize -->
+  <mouse>
+  </mouse>
+</labwc_config>

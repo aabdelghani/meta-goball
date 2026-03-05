@@ -7,7 +7,7 @@ inherit core-image extrausers
 # Set root password to "123"
 EXTRA_USERS_PARAMS = "usermod -p '\$5\$goball\$3WgxxN89Gbwt9NMiFlfW7eIlIgynHvdLkQqY5ItT3U5' root;"
 
-# Disable getty on tty1 — Weston uses it for kiosk display
+# Disable getty on tty1 — labwc uses it for kiosk display
 disable_getty() {
     ln -sf /dev/null ${IMAGE_ROOTFS}${systemd_system_unitdir}/getty@tty1.service
 }
@@ -20,8 +20,10 @@ IMAGE_INSTALL += " \
     libgpiod \
     libgpiod-tools \
     goball-config \
-    weston \
-    weston-init \
+    labwc \
+    labwc-init \
+    xkeyboard-config \
+    wlr-randr \
     mesa-megadriver \
     libegl-mesa \
     libgles2-mesa \

@@ -1,0 +1,39 @@
+#!/bin/sh
+# GoBall test scenario: full flow
+SCRIPT_DIR=$(dirname "$0")
+tap() { "$SCRIPT_DIR/tap" "$@"; }
+echo "=== GoBall Test Scenario ==="
+
+echo "1. Tap quota_points (select point mode)"
+tap quota_points
+sleep 1
+
+echo "2. Tap quota_points (increase to 2 players)"
+tap quota_points
+sleep 1
+
+echo "3. Tap quota_points (increase to 3 players)"
+tap quota_points
+sleep 1
+
+echo "4. Tap eight_points (select 8 points)"
+tap eight_points
+sleep 1
+
+echo "5. Tap player1_edit (edit player 1)"
+tap player1_edit
+sleep 1
+
+echo "6. Tap comma"
+tap comma
+sleep 1
+
+echo "7. Tap edit_confirm (confirm edit)"
+tap edit_confirm
+sleep 1
+
+echo "8. Tap main_menu (go to main menu)"
+tap main_menu
+sleep 1
+
+echo "=== Scenario complete ==="
