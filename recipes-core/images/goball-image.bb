@@ -24,6 +24,7 @@ IMAGE_INSTALL += " \
     labwc-init \
     xkeyboard-config \
     wlr-randr \
+    xwayland \
     mesa-megadriver \
     libegl-mesa \
     libgles2-mesa \

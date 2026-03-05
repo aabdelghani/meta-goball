@@ -32,7 +32,7 @@ inherit meson pkgconfig features_check
 
 REQUIRED_DISTRO_FEATURES = "wayland opengl"
 
-PACKAGECONFIG ??= ""
+PACKAGECONFIG ??= "xwayland"
 PACKAGECONFIG[xwayland] = "-Dxwayland=enabled,-Dxwayland=disabled,xwayland libxcb xcb-util-wm"
 
 EXTRA_OEMESON = " \
@@ -40,7 +40,6 @@ EXTRA_OEMESON = " \
     -Dbackends=drm,libinput \
     -Drenderers=gles2 \
     -Dallocators=gbm \
-    -Dxwayland=disabled \
 "
 
 # hwdata.pc is installed to /usr/share/pkgconfig/ (data-only package),

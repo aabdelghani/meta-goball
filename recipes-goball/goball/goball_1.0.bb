@@ -23,7 +23,7 @@ SYSTEMD_AUTO_ENABLE = "enable"
 
 do_install() {
     install -d ${D}${bindir}
-    install -m 0755 ${B}/SquareLine_Project ${D}${bindir}/goball
+    install -m 0755 ${B}/goball ${D}${bindir}/goball
 
     install -d ${D}/opt/goball/sounds
     for f in $(find ${S}/modules/game_sounds -name '*.wav'); do

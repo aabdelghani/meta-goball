@@ -36,9 +36,11 @@ REQUIRED_DISTRO_FEATURES = "wayland opengl"
 
 EXTRA_OEMESON = " \
     -Dman-pages=disabled \
-    -Dxwayland=disabled \
+    -Dxwayland=enabled \
     -Dsvg=disabled \
 "
+
+DEPENDS += "xwayland libxcb"
 
 FILES:${PN} += " \
     ${datadir}/wayland-sessions \
