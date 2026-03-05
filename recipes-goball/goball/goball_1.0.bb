@@ -5,7 +5,7 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda
 
 DEPENDS = "libsdl2 libsdl2-mixer libgpiod"
 
-SRC_URI = "git://github.com/aabdelghani/GoBall.git;protocol=https;branch=master \
+SRC_URI = "git://github.com/aabdelghani/GoBall.git;protocol=https;branch=ui-redesign \
            file://goball.service \
            file://pulseaudio-system.service"
 SRCREV = "${AUTOREV}"
@@ -28,9 +28,16 @@ do_install() {
         install -m 0644 "$f" ${D}/opt/goball/sounds/
     done
 
+    install -d ${D}/opt/goball/videos
+    for f in $(find ${S}/modules/game_videos -name '*.mp4'); do
+        install -m 0644 "$f" ${D}/opt/goball/videos/
+    done
+
     install -d ${D}${systemd_system_unitdir}
     install -m 0644 ${WORKDIR}/goball.service ${D}${systemd_system_unitdir}/goball.service
     install -m 0644 ${WORKDIR}/pulseaudio-system.service ${D}${systemd_system_unitdir}/pulseaudio-system.service
 }
 
-FILES:${PN} += "/opt/goball /opt/goball/sounds"
+RDEPENDS:${PN} += "rpidistro-ffmpeg"
+
+FILES:${PN} += "/opt/goball /opt/goball/sounds /opt/goball/videos"
