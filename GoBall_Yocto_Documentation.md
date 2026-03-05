@@ -3,7 +3,7 @@
 **Project:** GoBall Mini Golf Scoring System
 **Platform:** Raspberry Pi 5
 **Build System:** Yocto Project (scarthgap LTS)
-**Last Updated:** 2026-02-22
+**Last Updated:** 2026-03-05
 
 ---
 
@@ -303,8 +303,8 @@ The `%` is a wildcard — our append applies to ANY version of the dropbear reci
           │                   │                       │
     ┌─────┴─────┐    ┌───────┴───────┐    ┌─────────┴──────────┐
     │  goball   │    │ goball-config │    │ System packages    │
-    │ (our app) │    │ (device cfg) │    │ weston, mesa,      │
-    └─────┬─────┘    └───────────────┘    │ pulseaudio, etc.  │
+    │ (our app) │    │ (device cfg) │    │ labwc, wlroots,    │
+    └─────┬─────┘    └───────────────┘    │ mesa, pulse, etc. │
           │                               └──────────────────────┘
     ┌─────┼──────────┐
     │     │          │
@@ -329,14 +329,22 @@ The `%` is a wildcard — our append applies to ANY version of the dropbear reci
 
 | Recipe | Category | What it builds | Why we need it |
 |---|---|---|---|
-| `goball_1.0.bb` | Application | The GoBall scoring app | Our main application |
+| `goball_1.0.bb` | Application | The GoBall scoring app (externalsrc) | Our main application |
 | `goball-config_1.0.bb` | Configuration | Network profiles, udev rules, SSH keys | Device setup on first boot |
 | `goball-image.bb` | Image | The complete SD card image | Combines everything into one flashable file |
 | `libgpiod_1.6.5.bb` | Support library | GPIO access library v1.6.5 | Ball sensor detection (v2.x has incompatible API) |
 | `libsdl2-mixer_2.8.1.bb` | Multimedia | SDL2 audio mixer | Sound effects (WAV playback only) |
+| `labwc_0.9.5.bb` | Compositor | labwc stacking compositor | Wayland display server (pure Wayland, no XWayland) |
+| `labwc-init.bb` | Compositor config | labwc service, rc.xml, environment | Kiosk mode, window rules, cursor hiding |
+| `wlroots_0.19.2.bb` | Compositor lib | wlroots compositor library | labwc dependency (pure Wayland) |
+| `libdisplay-info_0.1.1.bb` | Display lib | EDID/DisplayID library | wlroots dependency |
+| `wlr-randr_0.4.1.bb` | Display tool | Output management for wlroots | Sets display resolution at startup |
+| `hwdata_%.bbappend` | Support | hwdata native build support | wlroots build dependency |
+| `mpv_0.41.0.bb` | Multimedia | mpv video player (Wayland native, LuaJIT OSC) | Video playback overlay |
+| `libplacebo_7.360.0.bb` | Multimedia lib | GPU-accelerated rendering library | mpv dependency |
+| `mpv-raise_1.0.bb` | Window mgmt | Keeps mpv on top via wlr-foreign-toplevel protocol | Solves always-on-top reliably |
 | `dropbear_%.bbappend` | SSH override | Modifies Dropbear SSH config | Allows root login for development |
-| `weston-init.bbappend` | Display override | Modifies Weston compositor config | Kiosk mode, custom resolution |
-| `psplash_%.bbappend` | Boot splash override | Custom 2560x720 GoBall splash image | Branded splash during early boot (before Weston) |
+| `psplash_%.bbappend` | Boot splash override | Custom 2560x720 GoBall splash image | Branded splash during early boot (before labwc) |
 
 ### Package Dependencies Explained
 
@@ -435,7 +443,7 @@ bitbake goball-image             # Rebuild image (goball will be re-fetched & bu
 │  SDL2        │  SDL2_mixer   │ libgpiod  │ piolib    │
 │  (display)   │  (audio)      │ (sensors) │ (LEDs)    │
 ├──────────────┼───────────────┼───────────┼───────────┤
-│  Weston      │  PulseAudio   │ /dev/     │ /dev/     │
+│  labwc       │  PulseAudio   │ /dev/     │ /dev/     │
 │  (Wayland    │  → ALSA       │ gpiochip4 │ pio0      │
 │  compositor) │               │           │           │
 ├──────────────┴───────────────┴───────────┴───────────┤
@@ -453,8 +461,9 @@ bitbake goball-image             # Rebuild image (goball will be re-fetched & bu
 
 ```
 PID 1: systemd
-  ├── weston (Wayland compositor — owns the display)
-  │     └── GoBall (Wayland client — renders the UI)
+  ├── labwc (Wayland compositor — owns the display)
+  │     ├── GoBall (Wayland client — renders the UI)
+  │     └── mpv (Wayland native — video overlay, always-on-top)
   ├── pulseaudio (audio server)
   ├── NetworkManager (network management)
   ├── sshd (OpenSSH server)
@@ -492,25 +501,26 @@ Linux Kernel
 psplash (early userspace)
   │ - Shows custom GoBall splash image (2560x720) on framebuffer
   │ - Uses overridden framebuf.conf (RPi5 fb0 device path fix)
-  │ - Stays visible for ~5 seconds (Weston startup delay)
+  │ - Stays visible for ~5 seconds (labwc startup delay)
   ▼
 systemd
   │ - Starts services in dependency order:
   │   1. NetworkManager (network)
   │   2. PulseAudio (audio)
-  │   3. Weston (5s ExecStartPre sleep keeps splash visible)
-  │   4. GoBall (after weston.service is ready)
+  │   3. labwc (5s ExecStartPre sleep keeps splash visible)
+  │   4. GoBall (after labwc.service is ready)
   ▼
-Weston (kiosk-shell)
+labwc (wlroots compositor)
   │ - Takes over display from psplash
-  │ - Creates Wayland socket (wayland-1)
-  │ - Sets HDMI-A-2 to 2560x720
+  │ - Creates Wayland socket (wayland-0)
+  │ - Sets HDMI-A-2 to 2560x720 via wlr-randr startup command
   ▼
 GoBall Application
   │ - Connects to Wayland via SDL2
   │ - SDL2 loads libGLESv2.so.2 for rendering
   │ - LVGL initializes 2560x720 display
   │ - UI appears — system is ready!
+  │ - Video playback via mpv (native Wayland, always-on-top via labwc window rule)
   ▼
 Running (kiosk mode — no way to exit without SSH)
 ```
@@ -536,8 +546,8 @@ SDL2 Wayland backend
 Wayland protocol (shared memory / EGL buffer)
        │
        ▼
-Weston compositor (kiosk-shell)
-       │ ← weston.ini: mode=2560x720 on HDMI-A-2
+labwc compositor (wlroots-based)
+       │ ← rc.xml: kiosk window rules, wlr-randr sets 2560x720 on HDMI-A-2
        ▼
 KMS/DRM (kernel display subsystem)
        │ ← video=HDMI-A-2:2560x720@60D (kernel cmdline)
@@ -558,7 +568,7 @@ This is the unfortunate reality of embedded Linux display pipelines:
 |---|---|---|
 | config.txt `hdmi_cvt` | local.conf → config.txt | GPU firmware mode table (fallback) |
 | Kernel `video=` param | local.conf → cmdline | KMS/DRM mode selection at boot |
-| weston.ini `mode=` | weston.ini | Weston compositor mode request |
+| labwc `-s wlr-randr` | labwc.service | Compositor mode via wlr-randr startup command |
 | `hal_init(w, h)` | main.c | LVGL display buffer size |
 | `LV_SDL_FULLSCREEN` | lv_conf.h | Whether SDL window fills the screen |
 
@@ -672,7 +682,9 @@ Ethernet (priority 200) is preferred over WiFi (priority 100) when both are avai
 | File | On-device location | Purpose |
 |---|---|---|
 | `goball.service` | `/usr/lib/systemd/system/goball.service` | Auto-starts GoBall |
-| `weston.ini` | `/etc/xdg/weston/weston.ini` | Display compositor settings |
+| `labwc.service` | `/usr/lib/systemd/system/labwc.service` | Auto-starts labwc compositor |
+| `rc.xml` | `/etc/labwc/rc.xml` | labwc window rules, kiosk mode |
+| `environment` | `/etc/labwc/environment` | labwc environment variables |
 | `Banhof.nmconnection` | `/etc/NetworkManager/system-connections/` | WiFi profile |
 | `Ethernet.nmconnection` | `/etc/NetworkManager/system-connections/` | Static IP profile |
 | `99-pio.rules` | `/etc/udev/rules.d/` | PIO device permissions |
@@ -727,7 +739,7 @@ bitbake goball-config -c cleansstate && bitbake goball-image
 
 Must update ALL of these:
 1. `build/conf/local.conf` — `hdmi_cvt=` and `video=HDMI-A-2:WxH@60D`
-2. `meta-goball/recipes-graphics/wayland/weston-init/weston.ini` — `mode=WxH`
+2. `meta-goball/recipes-graphics/labwc/files/labwc.service` — `wlr-randr --mode WxH`
 3. `GoBall source main.c` — `hal_init(W, H)`
 4. `GoBall source lv_conf.h` — `LV_SDL_FULLSCREEN` (0 or 1)
 
@@ -740,7 +752,7 @@ ssh root@10.0.0.2
 
 # Check service status
 systemctl status goball
-systemctl status weston
+systemctl status labwc
 
 # View live logs
 journalctl -u goball -f
@@ -751,8 +763,12 @@ systemctl restart goball
 # Stop app and run manually
 systemctl stop goball
 SDL_VIDEODRIVER=wayland SDL_VIDEO_GL_DRIVER=libGLESv2.so.2 \
-    WAYLAND_DISPLAY=wayland-1 XDG_RUNTIME_DIR=/run/weston \
+    WAYLAND_DISPLAY=wayland-0 XDG_RUNTIME_DIR=/run/labwc \
     /usr/bin/goball
+
+# Run test scenarios
+/opt/tests/tips_scenario
+/opt/tests/quotapoints_scenario
 ```
 
 ---
@@ -779,6 +795,14 @@ SDL_VIDEODRIVER=wayland SDL_VIDEO_GL_DRIVER=libGLESv2.so.2 \
 | 14 | RPi default splash overrides custom | meta-raspberrypi `:rpi` override has higher priority | Use `:raspberrypi5` machine override (more specific) | 2026-02-22 |
 | 15 | psplash visible too briefly | Weston starts immediately, taking over display | Added `ExecStartPre=/bin/sleep 5` to weston.service | 2026-02-22 |
 | 16 | PulseAudio not connecting | System mode timing | Non-fatal (app continues) | OPEN |
+| 17 | Video forced fullscreen (Weston) | kiosk-shell maximizes all windows | Switched to labwc compositor | 2026-03-01 |
+| 18 | ffplay video position ignored (Wayland) | SDL2 Wayland backend ignores position hints | Added XWayland; ffplay uses SDL_VIDEODRIVER=x11 | 2026-03-05 |
+| 19 | ffplay goes behind goball on pause | -alwaysontop doesn't work via XWayland | Added ToggleAlwaysOnTop in labwc rc.xml window rule | 2026-03-05 |
+| 20 | Switched to pure Wayland + mpv | XWayland/X11 overhead, ffplay limitations | Upgraded to labwc 0.9.5, wlroots 0.19.2, removed XWayland entirely. Replaced ffplay with mpv 0.41.0 (native Wayland). Added libplacebo 7.360.0, FFmpeg 6.1.4 (replaced rpidistro-ffmpeg 4.3.4). mpv uses --ontop + labwc ToggleAlwaysOnTop window rule. | 2026-03-05 |
+| 21 | mpv died immediately (exit=1) | --no-osc and --input-file options removed in mpv 0.41.0 | Removed invalid options, kept --osd-level=0 and --input-terminal | 2026-03-05 |
+| 22 | mpv no audio output | mpv built without pulseaudio/alsa PACKAGECONFIG | Added pulseaudio and alsa to mpv PACKAGECONFIG defaults | 2026-03-05 |
+| 23 | mpv --osc=yes fails | mpv built without Lua (OSC is a Lua script) | Added LuaJIT to mpv PACKAGECONFIG (`-Dlua=luajit`) | 2026-03-05 |
+| 24 | mpv goes behind goball on touch | Compositor raises touched window; `--ontop` and `ToggleAlwaysOnTop` unreliable with maximized windows | Created `mpv-raise` service: uses `wlr-foreign-toplevel-management` Wayland protocol to call `activate()` on mpv every 500ms — compositor-level command that reliably raises the window | 2026-03-05 |
 
 ---
 
@@ -810,6 +834,13 @@ SDL_VIDEODRIVER=wayland SDL_VIDEO_GL_DRIVER=libGLESv2.so.2 \
 | **SDL2** | Simple DirectMedia Layer — cross-platform multimedia library |
 | **systemd** | Linux init system and service manager (PID 1) |
 | **Wayland** | Modern display protocol (replacement for X11) |
-| **Weston** | Reference Wayland compositor implementation |
+| **labwc** | Lightweight wlroots-based stacking compositor for Wayland (replaces Weston) |
+| **wlroots** | Modular Wayland compositor library used by labwc |
+| **mpv** | Modern video player with native Wayland support (replaced ffplay) |
+| **mpv-raise** | Custom service that keeps mpv on top using wlr-foreign-toplevel-management protocol |
+| **libplacebo** | GPU-accelerated video/image rendering library (mpv dependency) |
+| **wlr-foreign-toplevel-management** | Wayland protocol for managing windows from external clients (list, activate, minimize, close) |
+| **wlr-randr** | CLI tool to manage outputs on wlroots-based compositors |
+| **Weston** | Reference Wayland compositor (previously used, replaced by labwc) |
 | **WIC** | Wic Image Creator — Yocto tool that creates partitioned disk images |
 | **WS2812** | Addressable RGB LED protocol (NeoPixel) |

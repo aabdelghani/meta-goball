@@ -23,8 +23,8 @@ DEPENDS = " \
     libdisplay-info \
 "
 
-SRC_URI = "git://gitlab.freedesktop.org/wlroots/wlroots.git;protocol=https;branch=0.17"
-SRCREV = "a2d2c38a3127745629293066beeed0a649dff8de"
+SRC_URI = "git://gitlab.freedesktop.org/wlroots/wlroots.git;protocol=https;branch=0.19"
+SRCREV = "a047c2a33ff7724a476892cc4fe5dcb803607ef5"
 
 S = "${WORKDIR}/git"
 
@@ -32,7 +32,7 @@ inherit meson pkgconfig features_check
 
 REQUIRED_DISTRO_FEATURES = "wayland opengl"
 
-PACKAGECONFIG ??= "xwayland"
+PACKAGECONFIG ??= ""
 PACKAGECONFIG[xwayland] = "-Dxwayland=enabled,-Dxwayland=disabled,xwayland libxcb xcb-util-wm"
 
 EXTRA_OEMESON = " \
@@ -53,7 +53,12 @@ do_configure:prepend() {
     fi
 }
 
-FILES:${PN} += "${libdir}/lib*.so.*"
-FILES:${PN}-dev += "${libdir}/lib*.so ${libdir}/pkgconfig ${includedir}"
+# wlroots 0.19 ships an unversioned .so (libwlroots-0.19.so) that is the
+# runtime library, not a dev symlink. Override SOLIBS so it lands in the
+# main package.
+SOLIBS = ".so"
+FILES_SOLIBSDEV = ""
+FILES:${PN} += "${libdir}/libwlroots-*.so"
+FILES:${PN}-dev += "${libdir}/pkgconfig ${includedir}"
 
 BBCLASSEXTEND = ""

@@ -23,10 +23,11 @@ DEPENDS = " \
     pixman \
     virtual/egl \
     virtual/libgles2 \
+    libpng \
 "
 
-SRC_URI = "git://github.com/labwc/labwc.git;protocol=https;branch=v0.7"
-SRCREV = "71136fdf65940b4e924dea7f8285d2a21032755e"
+SRC_URI = "git://github.com/labwc/labwc.git;protocol=https;branch=master"
+SRCREV = "92755fb8020493e5fc1f3de074c9016f4d66f6ac"
 
 S = "${WORKDIR}/git"
 
@@ -36,13 +37,14 @@ REQUIRED_DISTRO_FEATURES = "wayland opengl"
 
 EXTRA_OEMESON = " \
     -Dman-pages=disabled \
-    -Dxwayland=enabled \
+    -Dxwayland=disabled \
     -Dsvg=disabled \
+    -Dicon=disabled \
+    -Dnls=disabled \
 "
-
-DEPENDS += "xwayland libxcb"
 
 FILES:${PN} += " \
     ${datadir}/wayland-sessions \
     ${datadir}/icons \
+    ${datadir}/xdg-desktop-portal \
 "

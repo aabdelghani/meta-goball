@@ -1,0 +1,16 @@
+[Unit]
+Description=Keep mpv window always on top
+After=labwc.service
+Requires=labwc.service
+
+[Service]
+Type=simple
+Environment="WAYLAND_DISPLAY=wayland-0"
+Environment="XDG_RUNTIME_DIR=/run/labwc"
+ExecStart=/usr/bin/mpv-raise
+Restart=always
+RestartSec=2
+User=root
+
+[Install]
+WantedBy=multi-user.target

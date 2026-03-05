@@ -24,7 +24,10 @@ IMAGE_INSTALL += " \
     labwc-init \
     xkeyboard-config \
     wlr-randr \
-    xwayland \
+    mpv \
+    mpv-raise \
+    fontconfig \
+    ttf-bitstream-vera \
     mesa-megadriver \
     libegl-mesa \
     libgles2-mesa \

@@ -45,6 +45,6 @@ do_install() {
     install -m 0755 ${WORKDIR}/quotapoints_scenario ${D}/opt/tests/quotapoints_scenario
 }
 
-RDEPENDS:${PN} += "rpidistro-ffmpeg python3-core"
+RDEPENDS:${PN} += "ffmpeg python3-core"
 
 FILES:${PN} += "/opt/goball /opt/goball/sounds /opt/goball/videos /opt/tests"

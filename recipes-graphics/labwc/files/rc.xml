@@ -15,20 +15,13 @@
     <raiseOnFocus>no</raiseOnFocus>
   </focus>
   <windowRules>
-    <!-- ffplay: positioned by goball, must NOT be maximized -->
-    <windowRule identifier="ffplay" title="*">
-      <skipTaskbar>yes</skipTaskbar>
-      <properties>
-        <decorate>no</decorate>
-      </properties>
+    <!-- mpv: no decorations, always on top, fixed position -->
+    <windowRule identifier="mpv" serverDecoration="no" skipTaskbar="yes" fixedPosition="yes" ignoreFocusRequest="yes">
+      <action name="ToggleAlwaysOnTop"/>
     </windowRule>
     <!-- goball/LVGL: maximize, no decorations -->
-    <windowRule identifier="goball" title="*">
+    <windowRule identifier="goball" serverDecoration="no" skipTaskbar="yes">
       <action name="Maximize"/>
-      <skipTaskbar>yes</skipTaskbar>
-      <properties>
-        <decorate>no</decorate>
-      </properties>
     </windowRule>
   </windowRules>
   <!-- Hide cursor immediately (kiosk/touchscreen mode) -->
@@ -38,7 +31,12 @@
   <!-- Kiosk mode: no keyboard shortcuts for window management -->
   <keyboard>
   </keyboard>
-  <!-- Kiosk mode: no mouse actions for window close/move/resize -->
+  <!-- Kiosk mode: focus only on touch, no raise (prevents ffplay going behind) -->
   <mouse>
+    <context name="Client">
+      <mousebind button="Left" action="Press">
+        <action name="Focus"/>
+      </mousebind>
+    </context>
   </mouse>
 </labwc_config>
