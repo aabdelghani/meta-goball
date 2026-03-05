@@ -344,6 +344,7 @@ The `%` is a wildcard — our append applies to ANY version of the dropbear reci
 | `libplacebo_7.360.0.bb` | Multimedia lib | GPU-accelerated rendering library | mpv dependency |
 | `mpv-raise_1.0.bb` | Window mgmt | Keeps mpv on top via wlr-foreign-toplevel protocol | Solves always-on-top reliably |
 | `grim_1.4.1.bb` | Debug tool | Wayland screenshot tool (wlr-screencopy) | Remote debugging via SSH |
+| `wpa-supplicant_%.bbappend` | Connectivity | Enables wpa_supplicant service on boot | Required by NetworkManager for WiFi |
 | `dropbear_%.bbappend` | SSH override | Modifies Dropbear SSH config | Allows root login for development |
 | `psplash_%.bbappend` | Boot splash override | Custom 2560x720 GoBall splash image | Branded splash during early boot (before labwc) |
 
@@ -806,6 +807,7 @@ SDL_VIDEODRIVER=wayland SDL_VIDEO_GL_DRIVER=libGLESv2.so.2 \
 | 24 | mpv goes behind goball on touch | Compositor raises touched window; `--ontop` and `ToggleAlwaysOnTop` unreliable with maximized windows | Created `mpv-raise` service: uses `wlr-foreign-toplevel-management` Wayland protocol to call `activate()` on mpv every 500ms — compositor-level command that reliably raises the window | 2026-03-05 |
 | 25 | Replaced Lua OSC with LVGL controls | Lua OSC rendered inside mpv window, couldn't match app theme | Removed `--script` Lua OSC. Added LVGL play/pause button + seekbar below video. Controls communicate via mpv IPC socket (`/tmp/mpv-ipc`). Position polling + pause state sync every 500ms via ontop timer. | 2026-03-06 |
 | 26 | Added grim screenshot tool | No way to capture screen remotely for debugging | Added `grim_1.4.1.bb` recipe (wlr-screencopy protocol). Usage: `WAYLAND_DISPLAY=wayland-0 XDG_RUNTIME_DIR=/run/labwc grim /tmp/screenshot.png` | 2026-03-06 |
+| 27 | WiFi not connecting | NetworkManager missing wifi plugin; wpa_supplicant disabled | Added `wifi` to DISTRO_FEATURES, `networkmanager-wifi` to IMAGE_INSTALL, enabled wpa_supplicant via bbappend (`SYSTEMD_AUTO_ENABLE = "enable"`) | 2026-03-06 |
 
 ---
 

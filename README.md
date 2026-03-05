@@ -49,7 +49,7 @@ These files are gitignored. The repo ships `.sample` versions as templates.
 - **UI Framework:** LVGL 9.x with SDL2 backend
 - **Init:** systemd
 - **SSH:** OpenSSH (root login, password + key auth)
-- **Networking:** NetworkManager (WiFi + Ethernet)
+- **Networking:** NetworkManager (WiFi via wpa_supplicant + Ethernet)
 
 ## Layer Structure
 
@@ -84,6 +84,8 @@ meta-goball/
 │   ├── wlroots/wlroots_0.19.2.bb   # Compositor library (pure Wayland)
 │   ├── libdisplay-info/             # EDID library (wlroots dependency)
 │   └── wlr-randr/                   # Output management tool
+├── recipes-connectivity/
+│   └── wpa-supplicant/              # bbappend: enable wpa_supplicant on boot
 ├── recipes-support/
 │   ├── libgpiod/                    # libgpiod v1.6.5 (bundled source)
 │   └── hwdata/                      # hwdata native bbappend for wlroots

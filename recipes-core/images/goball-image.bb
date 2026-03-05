@@ -48,6 +48,7 @@ IMAGE_INSTALL += " \
     htop \
     networkmanager \
     networkmanager-nmcli \
+    networkmanager-wifi \
     wpa-supplicant \
     linux-firmware-rpidistro-bcm43455 \
     iw \
