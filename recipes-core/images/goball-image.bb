@@ -26,6 +26,7 @@ IMAGE_INSTALL += " \
     wlr-randr \
     mpv \
     mpv-raise \
+    grim \
     fontconfig \
     ttf-bitstream-vera \
     mesa-megadriver \

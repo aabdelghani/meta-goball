@@ -41,7 +41,8 @@ These files are gitignored. The repo ships `.sample` versions as templates.
 - **Boot Splash:** Custom psplash with GoBall branding (5s visible before compositor)
 - **Compositor:** labwc 0.9.5 (wlroots 0.19.2, pure Wayland — no XWayland)
 - **Renderer:** SDL2 Wayland backend + OpenGL ES 2.0 (Mesa)
-- **Video Playback:** mpv 0.41.0 via native Wayland (always-on-top via mpv-raise + wlr-foreign-toplevel-management)
+- **Video Playback:** mpv 0.41.0 via native Wayland (always-on-top via mpv-raise + wlr-foreign-toplevel-management, LVGL controls via IPC)
+- **Screenshots:** grim 1.4.1 (Wayland screenshot tool for remote debugging)
 - **Audio:** PulseAudio (system mode) -> ALSA -> HDMI audio
 - **GPIO:** libgpiod v1.6.5 (ball sensors)
 - **LEDs:** WS2812 via RP1 PIO userspace driver — currently disabled
@@ -91,8 +92,9 @@ meta-goball/
 │   └── files/                       # udev rules, network profiles, SSH keys
 ├── recipes-multimedia/
 │   ├── sdl2-mixer/                  # SDL2_mixer (fetched from GitHub releases)
-│   ├── mpv/mpv_0.41.0.bb           # mpv video player (Wayland, PulseAudio, ALSA, LuaJIT OSC)
-│   └── libplacebo/libplacebo_7.360.0.bb  # GPU-accelerated rendering (mpv dependency)
+│   ├── mpv/mpv_0.41.0.bb           # mpv video player (Wayland, PulseAudio, ALSA)
+│   ├── libplacebo/libplacebo_7.360.0.bb  # GPU-accelerated rendering (mpv dependency)
+│   └── grim/grim_1.4.1.bb          # Wayland screenshot tool (remote debugging)
 ├── recipes-goball/mpv-raise/
 │   └── mpv-raise_1.0.bb            # Keeps mpv always on top via wlr-foreign-toplevel protocol
 ├── setup-goball.sh                  # One-command build environment setup
@@ -191,6 +193,17 @@ systemctl status labwc                 # Compositor status
 nmcli device status                    # Network status
 ```
 
+### Remote Screenshots
+
+```bash
+# Take screenshot on the Pi
+sshpass -p '123' ssh root@10.0.0.2 \
+  "WAYLAND_DISPLAY=wayland-0 XDG_RUNTIME_DIR=/run/labwc grim /tmp/screenshot.png"
+
+# Pull to local machine
+sshpass -p '123' scp root@10.0.0.2:/tmp/screenshot.png ./screenshot.png
+```
+
 ## Hardware
 
 - **SoC:** Broadcom BCM2712 (RPi5)
@@ -216,6 +229,7 @@ labwc is a wlroots-based stacking compositor chosen because:
 - goball window rule: maximized, no decoration
 - `<mouse>` with Focus-only binding (no Raise)
 - mpv-raise service: uses `wlr-foreign-toplevel-management` protocol to keep mpv on top (activates every 500ms)
+- mpv controlled via IPC socket (`/tmp/mpv-ipc`) — LVGL renders play/pause + seekbar natively
 - Empty `<keyboard>` section for kiosk mode
 
 ### Display Resolution

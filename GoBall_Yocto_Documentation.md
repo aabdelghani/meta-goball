@@ -3,7 +3,7 @@
 **Project:** GoBall Mini Golf Scoring System
 **Platform:** Raspberry Pi 5
 **Build System:** Yocto Project (scarthgap LTS)
-**Last Updated:** 2026-03-05
+**Last Updated:** 2026-03-06
 
 ---
 
@@ -343,6 +343,7 @@ The `%` is a wildcard — our append applies to ANY version of the dropbear reci
 | `mpv_0.41.0.bb` | Multimedia | mpv video player (Wayland native, LuaJIT OSC) | Video playback overlay |
 | `libplacebo_7.360.0.bb` | Multimedia lib | GPU-accelerated rendering library | mpv dependency |
 | `mpv-raise_1.0.bb` | Window mgmt | Keeps mpv on top via wlr-foreign-toplevel protocol | Solves always-on-top reliably |
+| `grim_1.4.1.bb` | Debug tool | Wayland screenshot tool (wlr-screencopy) | Remote debugging via SSH |
 | `dropbear_%.bbappend` | SSH override | Modifies Dropbear SSH config | Allows root login for development |
 | `psplash_%.bbappend` | Boot splash override | Custom 2560x720 GoBall splash image | Branded splash during early boot (before labwc) |
 
@@ -803,6 +804,8 @@ SDL_VIDEODRIVER=wayland SDL_VIDEO_GL_DRIVER=libGLESv2.so.2 \
 | 22 | mpv no audio output | mpv built without pulseaudio/alsa PACKAGECONFIG | Added pulseaudio and alsa to mpv PACKAGECONFIG defaults | 2026-03-05 |
 | 23 | mpv --osc=yes fails | mpv built without Lua (OSC is a Lua script) | Added LuaJIT to mpv PACKAGECONFIG (`-Dlua=luajit`) | 2026-03-05 |
 | 24 | mpv goes behind goball on touch | Compositor raises touched window; `--ontop` and `ToggleAlwaysOnTop` unreliable with maximized windows | Created `mpv-raise` service: uses `wlr-foreign-toplevel-management` Wayland protocol to call `activate()` on mpv every 500ms — compositor-level command that reliably raises the window | 2026-03-05 |
+| 25 | Replaced Lua OSC with LVGL controls | Lua OSC rendered inside mpv window, couldn't match app theme | Removed `--script` Lua OSC. Added LVGL play/pause button + seekbar below video. Controls communicate via mpv IPC socket (`/tmp/mpv-ipc`). Position polling + pause state sync every 500ms via ontop timer. | 2026-03-06 |
+| 26 | Added grim screenshot tool | No way to capture screen remotely for debugging | Added `grim_1.4.1.bb` recipe (wlr-screencopy protocol). Usage: `WAYLAND_DISPLAY=wayland-0 XDG_RUNTIME_DIR=/run/labwc grim /tmp/screenshot.png` | 2026-03-06 |
 
 ---
 
@@ -840,6 +843,7 @@ SDL_VIDEODRIVER=wayland SDL_VIDEO_GL_DRIVER=libGLESv2.so.2 \
 | **mpv-raise** | Custom service that keeps mpv on top using wlr-foreign-toplevel-management protocol |
 | **libplacebo** | GPU-accelerated video/image rendering library (mpv dependency) |
 | **wlr-foreign-toplevel-management** | Wayland protocol for managing windows from external clients (list, activate, minimize, close) |
+| **grim** | Screenshot tool for Wayland compositors using wlr-screencopy protocol |
 | **wlr-randr** | CLI tool to manage outputs on wlroots-based compositors |
 | **Weston** | Reference Wayland compositor (previously used, replaced by labwc) |
 | **WIC** | Wic Image Creator — Yocto tool that creates partitioned disk images |
