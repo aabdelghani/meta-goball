@@ -36,7 +36,7 @@ These files are gitignored. The repo ships `.sample` versions as templates.
 
 - **Yocto Branch:** scarthgap (LTS)
 - **Machine:** raspberrypi5
-- **Distro:** goball-distro (GoBall OS 1.0)
+- **Distro:** goball-distro (GoBall OS 1.7.0)
 - **Display:** 2560x720 ultrawide via HDMI-A-2 (KMS/DRM, custom CVT mode)
 - **Boot Splash:** Custom psplash with GoBall branding (5s visible before compositor)
 - **Compositor:** labwc 0.9.5 (wlroots 0.19.2, pure Wayland — no XWayland)
