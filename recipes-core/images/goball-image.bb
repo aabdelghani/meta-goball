@@ -11,7 +11,18 @@ EXTRA_USERS_PARAMS = "usermod -p '\$5\$goball\$3WgxxN89Gbwt9NMiFlfW7eIlIgynHvdLk
 disable_getty() {
     ln -sf /dev/null ${IMAGE_ROOTFS}${systemd_system_unitdir}/getty@tty1.service
 }
-ROOTFS_POSTPROCESS_COMMAND += "disable_getty;"
+ROOTFS_POSTPROCESS_COMMAND += "disable_getty; write_build_info;"
+
+write_build_info() {
+    cat > ${IMAGE_ROOTFS}${sysconfdir}/goball-build-info <<BUILDEOF
+BUILD_TIME=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
+BUILD_HOST=$(hostname)
+BUILD_ID=$(date -u '+%Y%m%d%H%M%S')
+META_GOBALL_REV=$(cd ${TOPDIR}/../meta-goball && git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+MACHINE=${MACHINE}
+DISTRO=${DISTRO}
+BUILDEOF
+}
 
 IMAGE_INSTALL += " \
     goball \

@@ -6,6 +6,7 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda
 SRC_URI = " \
     file://labwc.service \
     file://labwc-env \
+    file://labwc-display-setup.sh \
     file://rc.xml \
     file://environment \
 "
@@ -27,6 +28,9 @@ do_install() {
     install -d ${D}${sysconfdir}/labwc
     install -m0644 ${WORKDIR}/rc.xml ${D}${sysconfdir}/labwc/rc.xml
     install -m0644 ${WORKDIR}/environment ${D}${sysconfdir}/labwc/environment
+
+    # Display setup script (called by labwc -s)
+    install -D -m0755 ${WORKDIR}/labwc-display-setup.sh ${D}${bindir}/labwc-display-setup.sh
 
     # /run/labwc is created at runtime by ExecStartPre in labwc.service
 }

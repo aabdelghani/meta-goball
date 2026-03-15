@@ -49,7 +49,7 @@ These files are gitignored. The repo ships `.sample` versions as templates.
 - **UI Framework:** LVGL 9.x with SDL2 backend
 - **Init:** systemd
 - **SSH:** OpenSSH (root login, password + key auth)
-- **Networking:** NetworkManager (WiFi via wpa_supplicant + Ethernet)
+- **Networking:** NetworkManager + wpa_supplicant (WiFi + Ethernet)
 
 ## Layer Structure
 
@@ -78,6 +78,7 @@ meta-goball/
 │   │   ├── labwc-init.bb
 │   │   └── files/
 │   │       ├── labwc.service
+│   │       ├── labwc-display-setup.sh  # HDMI output config (handles missing ports)
 │   │       ├── rc.xml               # Window rules, kiosk mode, cursor hiding
 │   │       ├── environment          # WLR env vars
 │   │       └── labwc-env
@@ -192,7 +193,7 @@ ssh root@<dhcp-ip>
 systemctl status goball                # App status
 journalctl -u goball --no-pager -n 50  # App logs
 systemctl status labwc                 # Compositor status
-nmcli device status                    # Network status
+iw dev wlan0 link                      # WiFi status
 ```
 
 ### Remote Screenshots
@@ -236,9 +237,19 @@ labwc is a wlroots-based stacking compositor chosen because:
 
 ### Display Resolution
 
-Set via `wlr-randr` startup command in labwc.service:
+Set via `labwc-display-setup.sh` script (called by labwc on startup):
+```sh
+wlr-randr --output HDMI-A-2 --mode 2560x720
+wlr-randr --output HDMI-A-1 --off 2>/dev/null
 ```
-ExecStart=/usr/bin/labwc -s "wlr-randr --output HDMI-A-2 --mode 2560x720"
+
+The script handles missing HDMI ports gracefully — if only one port is connected, the other is silently skipped. The custom 2560x720 mode is created by the kernel via `video=HDMI-A-2:2560x720@60D` in the boot cmdline.
+
+### Build Identification
+
+Each image writes `/etc/goball-build-info` with build timestamp, host, git revision, machine, and distro. Check on a running device:
+```bash
+ssh root@10.0.0.2 'cat /etc/goball-build-info'
 ```
 
 ## Related
