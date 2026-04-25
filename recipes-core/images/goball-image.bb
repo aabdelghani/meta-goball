@@ -63,4 +63,8 @@ IMAGE_INSTALL += " \
     wpa-supplicant \
     linux-firmware-rpidistro-bcm43455 \
     iw \
+    python3 \
+    python3-paho-mqtt \
+    goball-agent \
+    goball-tools \
 "
