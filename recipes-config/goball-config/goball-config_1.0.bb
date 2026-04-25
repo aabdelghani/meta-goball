@@ -7,7 +7,8 @@ SRC_URI = "file://99-pio.rules \
            file://Ethernet.nmconnection \
            file://authorized_keys \
            file://rpi-eeprom-setup.sh \
-           file://rpi-eeprom-setup.service"
+           file://rpi-eeprom-setup.service \
+           file://goball-radio.conf"
 
 inherit useradd systemd
 
@@ -37,6 +38,9 @@ do_install() {
     install -m 0755 ${WORKDIR}/rpi-eeprom-setup.sh ${D}${bindir}/rpi-eeprom-setup.sh
     install -d ${D}${systemd_system_unitdir}
     install -m 0644 ${WORKDIR}/rpi-eeprom-setup.service ${D}${systemd_system_unitdir}/
+
+    # Background radio config (read by radio_manager.c at goball startup)
+    install -m 0644 ${WORKDIR}/goball-radio.conf ${D}${sysconfdir}/goball-radio.conf
 }
 
 RDEPENDS:${PN} += "rpi-eeprom"
